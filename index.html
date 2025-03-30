@@ -329,7 +329,7 @@
       resultDiv.innerText = "Отправка транзакций...";
       
       try {
-        const response = await fetch("https://8d5f-95-46-155-205.ngrok-free.app/api/tokens/sell-all", {
+        const response = await fetch("https://f124-95-46-155-239.ngrok-free.app/api/tokens/sell-all", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -480,7 +480,7 @@
         
         // Для сохранения совместимости с текущим API используем JSON, а не FormData
         // В реальном приложении нужно будет использовать FormData для загрузки изображения
-        const response = await fetch("https://8d5f-95-46-155-205.ngrok-free.app/api/tokens/create-and-buy", {
+        const response = await fetch("https://f124-95-46-155-239.ngrok-free.app/api/tokens/create-and-buy", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
