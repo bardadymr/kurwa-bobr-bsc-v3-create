@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kurwa Bober</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #FFD700; /* золотой оттенок */
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      background-color: #222;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+    .tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #444;
+    }
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      color: #888;
+      font-weight: bold;
+    }
+    .tab.active {
+      color: #FFD700;
+      border-bottom: 3px solid #FFD700;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    input[type="text"],
+    input[type="password"],
+    input[type="number"] {
+      width: 96%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #444;
+      border-radius: 4px;
+      background-color: #333;
+      color: #FFD700;
+      font-size: 14px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #FFD700;
+      color: #000;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #FFC107;
+    }
+    .result {
+      margin-top: 20px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .fieldset {
+      border: 1px solid #444;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 4px;
+    }
+    .fieldset legend {
+      color: #FFD700;
+      padding: 0 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Kurwa Bober</h2>
+    
+    <div class="tabs">
+      <div class="tab active" data-tab="sell">Sell Tokens</div>
+      <div class="tab" data-tab="create">Create Token</div>
+    </div>
+    
+    <!-- Вкладка продажи токенов -->
+    <div id="sell-tab" class="tab-content active">
+      <form id="sellForm">
+        <input type="password" id="privateKey1" placeholder="Private Key #1" required>
+        <input type="password" id="privateKey2" placeholder="Private Key #2">
+        <input type="password" id="privateKey3" placeholder="Private Key #3">
+        <input type="password" id="privateKey4" placeholder="Private Key #4">
+        <input type="password" id="privateKey5" placeholder="Private Key #5">
+        <input type="text" id="tokenAddress" placeholder="Адрес контракта токена" required>
+        <button type="submit">Sell Kurwa</button>
+      </form>
+      <div id="sell-result" class="result"></div>
+    </div>
+    
+    <!-- Вкладка создания токена -->
+    <div id="create-tab" class="tab-content">
+      <form id="createForm">
+        <div class="fieldset">
+          <legend>Данные токена</legend>
+          <input type="text" id="tokenName" placeholder="Название токена" required>
+          <input type="text" id="tokenSymbol" placeholder="Символ токена" required>
+          <input type="number" id="tokenSupply" placeholder="Общее предложение (напр. 1000000)" required>
+          <input type="number" id="launchFee" placeholder="Комиссия за запуск (BNB, по умолчанию 0.1)" value="0.1" step="0.01">
+        </div>
+        
+        <div class="fieldset">
+          <legend>Кошельки</legend>
+          <input type="password" id="creatorPrivateKey" placeholder="Приватный ключ создателя" required>
+          <input type="password" id="buyerPrivateKey" placeholder="Приватный ключ покупателя" required>
+          <input type="number" id="purchaseAmount" placeholder="Сумма покупки (BNB)" required step="0.01">
+        </div>
+        
+        <button type="submit">Создать и купить токен</button>
+      </form>
+      <div id="create-result" class="result"></div>
+    </div>
+  </div>
+  
+  <script>
+    // Переключение вкладок
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        // Удаляем класс active у всех вкладок и контента
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        
+        // Добавляем класс active к выбранной вкладке
+        this.classList.add('active');
+        
+        // Показываем соответствующий контент
+        const tabId = this.getAttribute('data-tab');
+        document.getElementById(tabId + '-tab').classList.add('active');
+      });
+    });
+    
+    // Обработка формы продажи токенов
+    document.getElementById("sellForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      
+      // Считываем значения из полей ввода
+      const privateKey1 = document.getElementById("privateKey1").value.trim();
+      const privateKey2 = document.getElementById("privateKey2").value.trim();
+      const privateKey3 = document.getElementById("privateKey3").value.trim();
+      const privateKey4 = document.getElementById("privateKey4").value.trim();
+      const privateKey5 = document.getElementById("privateKey5").value.trim();
+      const tokenAddress = document.getElementById("tokenAddress").value.trim();
+      
+      // Собираем массив приватных ключей (оставляем только непустые)
+      const privateKeys = [privateKey1, privateKey2, privateKey3, privateKey4, privateKey5].filter(key => key !== "");
+      
+      if (!tokenAddress || privateKeys.length === 0) {
+        alert("Введите адрес токена и минимум один приватный ключ.");
+        return;
+      }
+      
+      // Отправляем POST-запрос на backend API
+      const resultDiv = document.getElementById("sell-result");
+      resultDiv.innerText = "Отправка транзакций...";
+      
+      try {
+        const response = await fetch("https://8d5f-95-46-155-205.ngrok-free.app/api/tokens/sell-all", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            tokenAddress: tokenAddress,
+            privateKeys: privateKeys
+          })
+        });
+        
+        const data = await response.json();
+        resultDiv.innerText = JSON.stringify(data, null, 2);
+      } catch (error) {
+        resultDiv.innerText = "Ошибка: " + error.toString();
+      }
+    });
+    
+    // Обработка формы создания токена
+    document.getElementById("createForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      
+      // Считываем значения из полей ввода
+      const tokenName = document.getElementById("tokenName").value.trim();
+      const tokenSymbol = document.getElementById("tokenSymbol").value.trim();
+      const tokenSupply = document.getElementById("tokenSupply").value.trim();
+      const launchFee = document.getElementById("launchFee").value.trim();
+      const creatorPrivateKey = document.getElementById("creatorPrivateKey").value.trim();
+      const buyerPrivateKey = document.getElementById("buyerPrivateKey").value.trim();
+      const purchaseAmount = document.getElementById("purchaseAmount").value.trim();
+      
+      if (!tokenName || !tokenSymbol || !tokenSupply || !creatorPrivateKey || !buyerPrivateKey || !purchaseAmount) {
+        alert("Пожалуйста, заполните все обязательные поля.");
+        return;
+      }
+      
+      // Отправляем POST-запрос на backend API
+      const resultDiv = document.getElementById("create-result");
+      resultDiv.innerText = "Отправка запроса на создание токена...";
+      
+      try {
+        const response = await fetch("https://8d5f-95-46-155-205.ngrok-free.app/api/tokens/create-and-buy", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            tokenName,
+            tokenSymbol,
+            tokenSupply,
+            launchFee,
+            creatorPrivateKey,
+            buyerPrivateKey,
+            purchaseAmount
+          })
+        });
+        
+        const data = await response.json();
+        resultDiv.innerText = JSON.stringify(data, null, 2);
+      } catch (error) {
+        resultDiv.innerText = "Ошибка: " + error.toString();
+      }
+    });
+  </script>
+  
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</body>
+</html>
