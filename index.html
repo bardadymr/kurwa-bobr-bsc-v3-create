@@ -3,1262 +3,756 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Four.meme Token Creator</title>
+    <title>Создание токена на four.meme</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js" type="application/javascript"></script>
     <style>
         :root {
-            --bg-color: #0a0b17;
-            --card-bg: #1a1b27;
+            --primary-color: #2a2f3c;
+            --secondary-color: #1a1e27;
+            --accent-color: #8be9fd;
+            --accent-gradient: linear-gradient(90deg, #a3f7bf 0%, #8be9fd 100%);
             --text-color: #ffffff;
-            --accent-color: #3cb371; /* Medium sea green */
-            --border-color: #2a2b37;
-            --input-bg: #0f1021;
-            --error-color: #ff6b6b;
-            --warning-color: #ff9800;
-            --success-color: #4caf50;
-            --info-color: #2196f3;
+            --text-secondary: #94a3b8;
+            --border-color: #374151;
+            --error-color: #ef4444;
+            --success-color: #22c55e;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         body {
-            background-color: var(--bg-color);
+            background-color: var(--secondary-color);
             color: var(--text-color);
-            min-height: 100vh;
-            padding: 2rem;
+            line-height: 1.6;
         }
-        
+
         .container {
             max-width: 800px;
-            margin: 0 auto;
+            margin: 40px auto;
+            padding: 20px;
         }
-        
-        header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        
+
         h1 {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(90deg, #3cb371, #60efff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
         }
-        
-        .subtitle {
-            color: #aaa;
-            font-size: 1rem;
-        }
-        
-        .form-section {
-            background-color: var(--card-bg);
+
+        .form-container {
+            background-color: var(--primary-color);
             border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            border: 1px solid var(--border-color);
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        
+
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 24px;
         }
-        
+
         label {
             display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
+            margin-bottom: 8px;
+            font-weight: 500;
         }
-        
+
         .required::after {
             content: '*';
             color: var(--accent-color);
             margin-left: 4px;
         }
-        
+
         input[type="text"],
-        input[type="number"],
         input[type="password"],
-        textarea,
-        select {
+        textarea {
             width: 100%;
-            padding: 0.75rem 1rem;
+            padding: 12px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
-            background-color: var(--input-bg);
+            background-color: var(--secondary-color);
             color: var(--text-color);
-            font-size: 1rem;
+            font-size: 16px;
             transition: border-color 0.3s;
         }
-        
+
         input[type="text"]:focus,
-        input[type="number"]:focus,
         input[type="password"]:focus,
-        textarea:focus,
-        select:focus {
+        textarea:focus {
             outline: none;
             border-color: var(--accent-color);
         }
-        
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
         .image-upload {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             border: 2px dashed var(--border-color);
-            border-radius: 12px;
-            padding: 2rem;
+            border-radius: 8px;
+            padding: 30px;
             cursor: pointer;
             transition: border-color 0.3s;
+            position: relative;
+            overflow: hidden;
         }
-        
+
         .image-upload:hover {
             border-color: var(--accent-color);
         }
-        
-        .image-upload img {
-            max-width: 100%;
-            max-height: 200px;
-            margin-bottom: 1rem;
-            border-radius: 8px;
-            display: none;
-        }
-        
-        .image-upload p {
-            color: #aaa;
-            text-align: center;
-        }
-        
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            border: none;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(90deg, #3cb371, #60efff);
-            color: var(--bg-color);
-        }
-        
-        .btn-primary:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
-        
-        .btn-block {
+
+        .image-upload input[type="file"] {
+            position: absolute;
             width: 100%;
-            display: block;
-        }
-        
-        .tags-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-        
-        .tag {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
             cursor: pointer;
-            border: 2px solid var(--border-color);
-            background-color: var(--input-bg);
-            transition: all 0.3s;
         }
-        
-        .tag.selected {
+
+        .upload-icon {
+            width: 48px;
+            height: 48px;
             background-color: var(--accent-color);
-            color: var(--bg-color);
-            border-color: var(--accent-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
         }
-        
+
+        .upload-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            display: none;
+            margin-top: 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
         .token-options {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.75rem;
-            margin-top: 0.5rem;
+            gap: 12px;
+            margin-top: 12px;
         }
-        
+
         .token-option {
-            flex: 1;
-            min-width: 120px;
-            padding: 1rem;
+            padding: 10px 16px;
+            background-color: var(--secondary-color);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .token-option.selected {
+            background-color: rgba(139, 233, 253, 0.1);
+            border-color: var(--accent-color);
+        }
+
+        .tag-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .tag-option {
+            padding: 8px 16px;
+            background-color: var(--secondary-color);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .tag-option.selected {
+            background-color: rgba(139, 233, 253, 0.1);
+            border-color: var(--accent-color);
+        }
+
+        .optional-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .optional-tag {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: normal;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border: none;
             border-radius: 8px;
-            border: 2px solid var(--border-color);
-            background-color: var(--input-bg);
+            font-size: 16px;
+            font-weight: 600;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
         }
-        
-        .token-option.selected {
-            border-color: var(--accent-color);
+
+        .btn-create {
+            background: var(--accent-gradient);
+            color: var(--primary-color);
         }
-        
-        .token-option img {
-            width: 24px;
-            height: 24px;
-            margin-right: 0.5rem;
-            vertical-align: middle;
+
+        .btn-create:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
         }
-        
-        .spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-left-color: var(--accent-color);
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            margin-right: 10px;
-            vertical-align: middle;
+
+        .btn-create:active {
+            transform: translateY(0);
+        }
+
+        .extra-options {
+            margin-top: 24px;
             display: none;
         }
-        
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-        
-        .status-message {
-            margin-top: 1rem;
-            padding: 1rem;
+
+        .alert {
+            padding: 12px 16px;
             border-radius: 8px;
-            display: none;
+            margin-bottom: 20px;
         }
-        
-        .status-message.error {
-            background-color: rgba(255, 107, 107, 0.2);
+
+        .alert-error {
+            background-color: rgba(239, 68, 68, 0.1);
             border: 1px solid var(--error-color);
             color: var(--error-color);
         }
-        
-        .status-message.success {
-            background-color: rgba(60, 179, 113, 0.2);
-            border: 1px solid var(--accent-color);
-            color: var(--accent-color);
+
+        .alert-success {
+            background-color: rgba(34, 197, 94, 0.1);
+            border: 1px solid var(--success-color);
+            color: var(--success-color);
         }
-        
-        .status-message.warning {
-            background-color: rgba(255, 152, 0, 0.2);
-            border: 1px solid var(--warning-color);
-            color: var(--warning-color);
-        }
-        
-        .status-message.info {
-            background-color: rgba(33, 150, 243, 0.2);
-            border: 1px solid var(--info-color);
-            color: var(--info-color);
-        }
-        
-        .advanced-section {
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border-color);
+
+        .hide {
             display: none;
         }
-        
-        .toggle-advanced {
-            color: #aaa;
-            text-decoration: underline;
-            cursor: pointer;
-            display: inline-block;
-            margin-top: 1rem;
-        }
-        
-        /* Switch */
-        .switch-container {
+
+        .loading {
             display: flex;
             align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
-        
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-            margin-right: 10px;
-        }
-        
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--input-bg);
-            transition: .4s;
-            border-radius: 24px;
-        }
-        
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 4px;
-            bottom: 4px;
-            background-color: var(--text-color);
-            transition: .4s;
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
             border-radius: 50%;
+            border-top-color: var(--accent-color);
+            animation: spin 1s linear infinite;
         }
-        
-        input:checked + .slider {
-            background-color: var(--accent-color);
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
-        
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
-        
-        /* Private Key Input */
-        .private-key-input-container {
-            display: flex;
-            position: relative;
-        }
-        
-        .private-key-input {
-            width: 100%;
-            padding-right: 80px;
-        }
-        
-        .toggle-password-btn {
-            position: absolute;
-            right: 0;
-            top: 0;
-            height: 100%;
-            background: none;
-            border: none;
-            border-left: 1px solid var(--border-color);
-            color: var(--accent-color);
-            padding: 0 15px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-        }
-        
-        .toggle-password-btn:hover {
-            background-color: rgba(60, 179, 113, 0.1);
-        }
-        
-        .private-key-warning {
-            margin-top: 5px;
-            color: var(--warning-color);
-            font-size: 0.8rem;
-        }
-        
-        .private-key-info {
-            margin-top: 10px;
-            padding: 10px;
-            background-color: rgba(60, 179, 113, 0.1);
-            border-radius: 8px;
-            border: 1px solid var(--accent-color);
-        }
-        
-        .info-row {
-            display: flex;
-            margin-bottom: 5px;
-        }
-        
-        .info-row:last-child {
-            margin-bottom: 0;
-        }
-        
-        .info-label {
-            font-weight: bold;
-            min-width: 80px;
-        }
-        
-        .info-value {
-            word-break: break-all;
-            font-family: monospace;
-        }
-        
-        .info-unit {
-            margin-left: 5px;
-            opacity: 0.7;
-        }
-        
-        /* ngrok URL Input */
-        .ngrok-container {
-            margin-top: 20px;
-            border-top: 1px solid var(--border-color);
-            padding-top: 20px;
-        }
-        
-        .ngrok-input-container {
-            display: flex;
-        }
-        
-        .ngrok-input {
-            flex: 1;
-            margin-right: 10px;
-        }
-        
-        .ngrok-note {
-            margin-top: 5px;
-            font-size: 0.8rem;
-            color: #aaa;
+
+        /* Адаптивный дизайн */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin: 20px auto;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+            
+            .token-options, .tag-options {
+                gap: 8px;
+            }
+            
+            .token-option, .tag-option {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Four.meme Token Creator</h1>
-            <p class="subtitle">Create your own token on the Four.meme platform</p>
-        </header>
+        <h1>Создание токена на four.meme</h1>
         
-        <div class="form-section">
-            <div class="form-group">
-                <label for="tokenImage" class="required">Token Image</label>
-                <div class="image-upload" id="imageUploadArea">
-                    <img id="previewImage" src="#" alt="Token Image Preview">
-                    <p>Drag & drop your token image here or click to browse</p>
-                    <p>(JPEG, PNG, or WebP, max 5MB)</p>
-                    <input type="file" id="tokenImage" accept="image/*" style="display: none;">
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label for="tokenName" class="required">Token Name</label>
-                <input type="text" id="tokenName" placeholder="Enter token name">
-            </div>
-            
-            <div class="form-group">
-                <label for="tokenSymbol" class="required">Ticker Symbol</label>
-                <input type="text" id="tokenSymbol" placeholder="Enter ticker symbol (e.g., BTC)" maxlength="10">
-            </div>
-            
-            <div class="form-group">
-                <label for="tokenDescription" class="required">Description</label>
-                <textarea id="tokenDescription" rows="4" placeholder="Describe your token"></textarea>
-            </div>
-        </div>
+        <div id="alertContainer"></div>
         
-        <div class="form-section">
+        <div class="form-container">
             <div class="form-group">
-                <label>Raised Token</label>
-                <div class="token-options">
-                    <div class="token-option selected" data-token="BNB">
-                        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNiIgZmlsbD0iI0YzQkEyRiIvPjxwYXRoIGZpbGw9IiNGRkYiIGQ9Ik0xMi4xMTYgMTQuNDA0TDE2IDEwLjUybDMuODg2IDMuODg2IDIuMjYtMi4yNkwxNiA2LjAwNmwtNi4xNDYgNi4xNDYgMi4yNiAyLjI1MnpNOC4wMDYgMTZsMi4yNi0yLjI2TDEyLjUyNiAxNmwtMi4yNiAyLjI2TDguMDA2IDE2em00LjExIDQuMTFMMTYgMjQuMDI0bDMuODg2LTMuODg2IDIuMjYgMi4yNTlMMTYgMjguNTFsLTYuMTQ2LTYuMTQ1IDIuMjYtMi4yNnptNy42NS00LjExbDIuMjYtMi4yNkwyNC4yODYgMTZsLTIuMjYgMi4yNi0yLjI2LTIuMjZ6TTIxLjg4NCAxNkwxNiAxMC4xMTYgMTAuMTE2IDE2IDE2IDIxLjg4NGw1Ljg4NC01Ljg4NHoiLz48L2c+PC9zdmc+" alt="BNB">
-                        BNB
+                <label for="tokenImage" class="required">Изображение токена</label>
+                <div class="image-upload" id="imageUploadContainer">
+                    <div class="upload-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
                     </div>
-                    <div class="token-option" data-token="CAKE">
-                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNiIgZmlsbD0iIzYwRUZGRiIvPjxwYXRoIGQ9Ik0xNS45OTkgNi4wMDU5OEMxMS44NiA2LjAwNTk4IDguNSA5LjM2NTk4IDguNSAxMy41MDZDOCAxOC41MDYgMTIuNSAyMi41MDYgMTYgMjYuMDA2QzE5LjUgMjIuNTA2IDI0IDE4LjUwNiAyMy41IDEzLjUwNkMyMy41IDkuMzY1OTggMjAuMTM5IDYuMDA1OTggMTUuOTk5IDYuMDA1OThaIiBmaWxsPSIjNjBFRkZGIi8+PHBhdGggZD0iTTE1Ljk5OSA2LjAwNTk4QzExLjg2IDYuMDA1OTggOC41IDkuMzY1OTggOC41IDEzLjUwNkM4IDE4LjUwNiAxMi41IDIyLjUwNiAxNiAyNi4wMDZDMTkuNSAyMi41MDYgMjQgMTguNTA2IDIzLjUgMTMuNTA2QzIzLjUgOS4zNjU5OCAyMC4xMzkgNi4wMDU5OCAxNS45OTkgNi4wMDU5OFoiIGZpbGw9InVybCgjcGFpbnQwX2xpbmVhcl8xODA2XzEwMzE3NykiLz48cGF0aCBkPSJNMTYgOS41MDZDMTQuMzQzIDkuNTA2IDEzIDEwLjg0OSAxMyAxMi41MDZDMTMgMTQuMTYzIDE0LjM0MyAxNS41MDYgMTYgMTUuNTA2QzE3LjY1NyAxNS41MDYgMTkgMTQuMTYzIDE5IDEyLjUwNkMxOSAxMC44NDkgMTcuNjU3IDkuNTA2IDE2IDkuNTA2WiIgZmlsbD0id2hpdGUiLz48cGF0aCBkPSJNMTYuMDAxIDIyLjUwNkMxNi41NTMgMjIuNTA2IDE3IDIyLjA1OSAxNyAyMS41MDZDMTcgMjAuOTUzIDE2LjU1MyAyMC41MDYgMTYuMDAxIDIwLjUwNkMxNS40NDggMjAuNTA2IDE1IDIwLjk1MyAxNSAyMS41MDZDMTUgMjIuMDU5IDE1LjQ0OCAyMi41MDYgMTYuMDAxIDIyLjUwNloiIGZpbGw9IndoaXRlIi8+PHBhdGggZD0iTTEzLjUwMSAyMC41MDZDMTQuMDUzIDIwLjUwNiAxNC41MjEgMjAuMDU5IDE0LjUyMSAxOS41MDZDMTQuNTIxIDE4Ljk1MyAxNC4wNTMgMTguNTA2IDEzLjUgMTguNTA2QzEyLjk0OCAxOC41MDYgMTIuNSAxOC45NTMgMTIuNSAxOS41MDZDMTIuNSAyMC4wNTkgMTIuOTQ4IDIwLjUwNiAxMy41MDEgMjAuNTA2WiIgZmlsbD0id2hpdGUiLz48cGF0aCBkPSJNMTguNTAxIDIwLjUwNkMxOS4wNTMgMjAuNTA2IDE5LjUwMSAyMC4wNTkgMTkuNTAxIDE5LjUwNkMxOS41MDEgMTguOTUzIDE5LjA1MyAxOC41MDYgMTguNTAxIDE4LjUwNkMxNy45NDggMTguNTA2IDE3LjUgMTguOTUzIDE3LjUgMTkuNTA2QzE3LjUgMjAuMDU5IDE3Ljk0OCAyMC41MDYgMTguNTAxIDIwLjUwNloiIGZpbGw9IndoaXRlIi8+PHBhdGggZD0iTTE1Ljc1MSAxOS4yNTZDMTYuMzAzIDE5LjI1NiAxNi43NTEgMTguODA5IDE2Ljc1MSAxOC4yNTZDMTYuNzUxIDE3LjcwMyAxNi4zMDMgMTcuMjU2IDE1Ljc1MSAxNy4yNTZDMTUuMTk4IDE3LjI1NiAxNC43NSAxNy43MDMgMTQuNzUgMTguMjU2QzE0Ljc1IDE4LjgwOSAxNS4xOTggMTkuMjU2IDE1Ljc1MSAxOS4yNTZaIiBmaWxsPSJ3aGl0ZSIvPjxwYXRoIGQ9Ik0xNi4yNTEgMTcuMDA2QzE2LjgwMyAxNy4wMDYgMTcuMjUxIDE2LjU1OSAxNy4yNTEgMTYuMDA2QzE3LjI1MSAxNS40NTMgMTYuODAzIDE1LjAwNiAxNi4yNTEgMTUuMDA2QzE1LjY5OCAxNS4wMDYgMTUuMjUgMTUuNDUzIDE1LjI1IDE2LjAwNkMxNS4yNSAxNi41NTkgMTUuNjk4IDE3LjAwNiAxNi4yNTEgMTcuMDA2WiIgZmlsbD0id2hpdGUiLz48cGF0aCBkPSJNMTcuNTAxIDE4LjAwNkMxOC4wNTMgMTguMDA2IDE4LjUwMSAxNy41NTkgMTguNTAxIDE3LjAwNkMxOC41MDEgMTYuNDUzIDE4LjA1MyAxNi4wMDYgMTcuNTAxIDE2LjAwNkMxNi45NDggMTYuMDA2IDE2LjUgMTYuNDUzIDE2LjUgMTcuMDA2QzE2LjUgMTcuNTU5IDE2Ljk0OCAxOC4wMDYgMTcuNTAxIDE4LjAwNloiIGZpbGw9IndoaXRlIi8+PHBhdGggZD0iTTE0LjUwMSAxOC4wMDZDMTUuMDUzIDE4LjAwNiAxNS41MDEgMTcuNTU5IDE1LjUwMSAxNy4wMDZDMTUuNTAxIDE2LjQ1MyAxNS4wNTMgMTYuMDA2IDE0LjUwMSAxNi4wMDZDMTMuOTQ4IDE2LjAwNiAxMy41IDE2LjQ1MyAxMy41IDE3LjAwNkMxMy41IDE3LjU1OSAxMy45NDggMTguMDA2IDE0LjUwMSAxOC4wMDZaIiBmaWxsPSJ3aGl0ZSIvPjxkZWZzPjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQwX2xpbmVhcl8xODA2XzEwMzE3NyIgeDE9IjEyIiB5MT0iN2UwNSIgeDI9IjE5IiB5Mj0iMTguNTA2IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHN0b3Agc3RvcC1jb2xvcj0id2hpdGUiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IndoaXRlIiBzdG9wLW9wYWNpdHk9IjAiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48L3N2Zz4=" alt="CAKE">
-                        CAKE
+                    <p>Нажмите для загрузки или перетащите изображение</p>
+                    <p style="font-size: 12px; color: var(--text-secondary);">JPG/PNG/WEBP (макс. 5MB)</p>
+                    <input type="file" id="tokenImage" accept="image/jpeg, image/png, image/webp" onchange="previewImage(event)">
+                    <img id="imagePreview" class="image-preview" src="#" alt="Предпросмотр изображения">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="tokenName" class="required">Название токена</label>
+                <input type="text" id="tokenName" placeholder="Введите название токена">
+            </div>
+            
+            <div class="form-group">
+                <label for="tokenSymbol" class="required">Тикер токена</label>
+                <input type="text" id="tokenSymbol" placeholder="Пример: BTC, ETH, PEPE">
+            </div>
+            
+            <div class="form-group">
+                <label for="description" class="required">Описание</label>
+                <textarea id="description" placeholder="Расскажите о своем токене"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="required">Токен для сбора средств</label>
+                <div class="token-options" id="raisedTokenOptions">
+                    <div class="token-option selected" data-value="BNB">
+                        <span>💰</span> BNB
                     </div>
-                    <div class="token-option" data-token="WHY">
-                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNiIgZmlsbD0iI0YzQkEyRiIvPjxwYXRoIGQ9Ik0xMC44MjkgMTAuMzI4SDE0LjA3TDE2IDYuMDA2TDE3LjkzIDEwLjMyOEgyMS4xN0wxOC4xNyAxMy4zMTdMMjAuMTAxIDE4LjAwNUwxNi4wMDEgMTQuOTMyTDExLjkgMTguMDA1TDEzLjgzMSAxMy4zMTdMMTAuODI5IDEwLjMyOFoiIGZpbGw9IndoaXRlIi8+PHBhdGggZD0iTTIxLjE3IDIxLjY3MUgxNy45MjlMMTUuOTk5IDI1Ljk5NFoxIiBmaWxsPSJ3aGl0ZSIvPjxwYXRoIGQ9Ik0xMC44MjkgMjEuNjcxSDEwLjc1NlYyMS42MjhMMTAuODI5IDIxLjY3MVYyMS42NzFaIiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==" alt="WHY">
-                        WHY
+                    <div class="token-option" data-value="CAKE">
+                        <span>🍰</span> CAKE
                     </div>
-</div>
-                    <div class="token-option" data-token="LiUSD">
-                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNiIgZmlsbD0iIzEwM0VBOSIvPjxwYXRoIGQ9Ik0xMi4xNSAyMC41SDguOFYxOS41NUgxMi4xNU0xMi4xNSAxNy4zNUg4LjhWMTYuNEgxMi4xNU0xMi4xNSAxNC4ySDguOFYxMy4yNUgxMi4xNU0xMi4xNSAxMS4wNUg4LjhWMTAuMUgxMi4xNU0yMy4yIDE5Ljg1QzIzLjIgMjAuNTc1IDIyLjkyNSAyMS4wNiAyMi40IDIxLjM1QzIxLjg3NSAyMS42NCAyMS4yNzUgMjEuNzc1IDIwLjY1IDIxLjc1SDIwLjFWMTkuODVIMjAuNjVDMjAuOTI1IDE5Ljg1IDIxLjE3NSAxOS43NzUgMjEuMzUgMTkuNjI1QzIxLjUyNSAxOS40NzUgMjEuNjI1IDE5LjI3NSAyMS42IDE5LjA1QzIxLjYgMTguNyAyMS40MjUgMTguNDI1IDIxLjA3NSAxOC4yMjVDMjAuNzI1IDE4LjA1IDIwLjMgMTcuOTUgMTkuODUgMTcuOTVDMTkuNTI1IDE3Ljk1IDE5LjIgMTguMDI1IDE4Ljg3NSAxOC4xNUMxOC41NSAxOC4yNzUgMTguMjc1IDE4LjQ1IDE4IDE4LjY3NVYxMS4zNUgxNi40VjIwLjVIMTRWMTEuMzVIMTIuNFYyMC41SDEyLjE1VjIxLjc1SDIzLjE3NUM3Mi4yMzUgMjEuNzUgMjMuMiAyMS4yMTUgMjMuMiAxOS44NSIgZmlsbD0id2hpdGUiLz48L3N2Zz4=" alt="LiUSD">
-                        LiUSD
+                    <div class="token-option" data-value="WHY">
+                        <span>🔶</span> WHY
                     </div>
-                    <div class="token-option" data-token="THENA">
-                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNiIgZmlsbD0iI0NCQkNGRiIvPjxwYXRoIGQ9Ik0xNiA4QzExLjU4MiA4IDggMTEuNTgyIDggMTZDOCAyMC40MTggMTEuNTgyIDI0IDE2IDI0QzIwLjQxOCAyNCAyNCAyMC40MTggMjQgMTZDMjQgMTEuNTgyIDIwLjQxOCA4IDE2IDhaIiBmaWxsPSIjOUM3MERGIi8+PHBhdGggZD0iTTE3LjU3IDE2Ljk2SDIwLjk2VjE0LjQzSDE3LjU3VjExLjA0SDE1LjA0VjE0LjQzSDExLjY1VjE2Ljk2SDE1LjA0VjIwLjM1SDE3LjU3VjE2Ljk2WiIgZmlsbD0id2hpdGUiLz48L3N2Zz4=" alt="THENA">
-                        THENA
+                    <div class="token-option" data-value="USDT">
+                        <span>💵</span> USDT
                     </div>
-                    <div class="token-option" data-token="SHELL">
-                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNiIgZmlsbD0iIzE1MTUxNSIvPjxwYXRoIGQ9Ik0xNS45OTkgNi42NjdDMTAuODQ5IDYuNjY3IDYuNjY1IDEwLjg1IDYuNjY1IDE2QzYuNjY1IDIxLjE1IDEwLjg0OSAyNS4zMzMgMTUuOTk5IDI1LjMzM0MyMS4xNDkgMjUuMzMzIDI1LjMzMiAyMS4xNSAyNS4zMzIgMTZDMjUuMzMyIDEwLjg1IDIxLjE0OSA2LjY2NyAxNS45OTkgNi42NjdaTTE4LjE5OSAyMC44MTdMMTYuNjY1IDE5LjI1SDEzLjU5OUwxMS45OTkgMTcuNjgzVjE0LjY1TDEzLjU5OSAxMy4wNUgxNi42NjVMMTguMTk5IDExLjUxN0wyMC44MzIgMTQuMTgzTDE4LjE5OSAxNkwyMC44MzIgMTguMTVMMTguMTk5IDIwLjgxN1oiIGZpbGw9IndoaXRlIi8+PC9zdmc+" alt="SHELL">
-                        SHELL
+                    <div class="token-option" data-value="LiSUSD">
+                        <span>🔹</span> LiSUSD
+                    </div>
+                    <div class="token-option" data-value="THENA">
+                        <span>🟣</span> THENA
+                    </div>
+                    <div class="token-option" data-value="SHELL">
+                        <span>⚪</span> SHELL
                     </div>
                 </div>
             </div>
             
             <div class="form-group">
-                <label>Tag</label>
-                <div class="tags-container">
-                    <div class="tag selected" data-tag="Meme">Meme</div>
-                    <div class="tag" data-tag="AI">AI</div>
-                    <div class="tag" data-tag="Defi">Defi</div>
-                    <div class="tag" data-tag="Games">Games</div>
-                    <div class="tag" data-tag="Infra">Infra</div>
-                    <div class="tag" data-tag="De-Sci">De-Sci</div>
-                    <div class="tag" data-tag="Social">Social</div>
-                    <div class="tag" data-tag="Depin">Depin</div>
-                    <div class="tag" data-tag="Charity">Charity</div>
-                    <div class="tag" data-tag="Others">Others</div>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label for="website">Website (Optional)</label>
+                <label for="website" class="optional-label">
+                    <span>Сайт</span>
+                    <span class="optional-tag">(Опционально)</span>
+                </label>
                 <input type="text" id="website" placeholder="https://yourwebsite.com">
             </div>
             
             <div class="form-group">
-                <label for="twitter">Twitter (Optional)</label>
-                <input type="text" id="twitter" placeholder="@yourtwitterhandle">
-            </div>
-            
-            <div class="form-group">
-                <label for="telegram">Telegram (Optional)</label>
-                <input type="text" id="telegram" placeholder="https://t.me/yourtelegram">
-            </div>
-            
-            <div class="switch-container form-group">
-                <label class="switch">
-                    <input type="checkbox" id="extraOptionsToggle">
-                    <span class="slider"></span>
+                <label for="twitter" class="optional-label">
+                    <span>Твиттер</span>
+                    <span class="optional-tag">(Опционально)</span>
                 </label>
-                <span>Extra Options</span>
+                <input type="text" id="twitter" placeholder="@yourtwitter">
             </div>
             
-            <div id="extraOptions" class="advanced-section">
-                <div class="form-group">
-                    <label for="totalSupply">Total Supply</label>
-                    <input type="number" id="totalSupply" placeholder="Total supply of tokens" value="1000000000">
-                </div>
-                <div class="form-group">
-                    <label for="maxOffers">Tokens for Sale</label>
-                    <input type="number" id="maxOffers" placeholder="Tokens available for initial sale" value="600000000">
-                </div>
-                <div class="form-group">
-                    <label for="maxRaising">Max Raising (BNB)</label>
-                    <input type="number" id="maxRaising" placeholder="Maximum BNB to raise" value="10" step="0.1">
-                </div>
-            </div>
-            
-            <!-- Private Key Input -->
-            <div class="form-group" id="privateKeyContainer">
-                <label for="privateKey">Private Key</label>
-                <div class="private-key-input-container">
-                    <input type="password" id="privateKey" placeholder="Enter your private key to create the token" class="private-key-input">
-                    <button type="button" id="togglePrivateKey" class="toggle-password-btn">
-                        <span class="show-text">Show</span>
-                        <span class="hide-text" style="display: none;">Hide</span>
-                    </button>
-                </div>
-                <p class="private-key-warning">⚠️ Warning: Only enter your private key on trusted devices. The key will not be stored and will only be used to sign the transaction.</p>
-                <div id="privateKeyInfo" class="private-key-info" style="display: none;">
-                    <div class="info-row">
-                        <span class="info-label">Address:</span>
-                        <span id="privateKeyAddress" class="info-value"></span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Balance:</span>
-                        <span id="privateKeyBalance" class="info-value"></span>
-                        <span class="info-unit">BNB</span>
-                    </div>
-                </div>
-            </div>
-            
-            <button id="createTokenBtn" class="btn btn-primary btn-block">
-                <span class="spinner" id="submitSpinner"></span>
-                Create Token
-            </button>
-            
-            <div id="statusMsg" class="status-message"></div>
-        </div>
-        
-        <!-- ngrok URL Input Section -->
-        <div class="form-section ngrok-container" id="ngrokUrlContainer" style="display: none;">
             <div class="form-group">
-                <label for="ngrokUrl">Backend URL (ngrok)</label>
-                <div class="ngrok-input-container">
-                    <input type="text" id="ngrokUrl" placeholder="https://your-ngrok-url.ngrok.io" class="ngrok-input">
-                    <button id="updateNgrokUrl" class="btn btn-primary">Update</button>
-                </div>
-                <p class="ngrok-note">Enter the ngrok URL to connect to the backend server</p>
+                <label for="telegram" class="optional-label">
+                    <span>Телеграм</span>
+                    <span class="optional-tag">(Опционально)</span>
+                </label>
+                <input type="text" id="telegram" placeholder="@yourtelegram">
             </div>
+            
+            <div class="form-group">
+                <label class="required">Тэг</label>
+                <div class="tag-options" id="tagOptions">
+                    <div class="tag-option selected" data-value="Meme">Meme</div>
+                    <div class="tag-option" data-value="AI">AI</div>
+                    <div class="tag-option" data-value="Defi">Defi</div>
+                    <div class="tag-option" data-value="Games">Games</div>
+                    <div class="tag-option" data-value="Infra">Infra</div>
+                    <div class="tag-option" data-value="De-Sci">De-Sci</div>
+                    <div class="tag-option" data-value="Social">Social</div>
+                    <div class="tag-option" data-value="Depin">Depin</div>
+                    <div class="tag-option" data-value="Charity">Charity</div>
+                    <div class="tag-option" data-value="Others">Others</div>
+                </div>
+            </div>
+            
+            <div class="checkbox-group">
+                <label class="checkbox-wrapper">
+                    <input type="checkbox" id="extraOptionsToggle">
+                    <span>Дополнительные параметры</span>
+                </label>
+            </div>
+            
+            <div class="extra-options" id="extraOptions">
+                <div class="form-group">
+                    <label for="totalSupply">Общее количество токенов</label>
+                    <input type="text" id="totalSupply" placeholder="Пример: 1000000000">
+                </div>
+                
+                <div class="form-group">
+                    <label for="initialPrice">Начальная цена (BNB)</label>
+                    <input type="text" id="initialPrice" placeholder="Пример: 0.0000001">
+                </div>
+                
+                <div class="form-group">
+                    <label for="liquidityPercentage">Процент ликвидности (%)</label>
+                    <input type="text" id="liquidityPercentage" placeholder="Пример: 80">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="privateKey" class="required">Приватный ключ</label>
+                <input type="password" id="privateKey" placeholder="Введите приватный ключ для подписи транзакции">
+                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">
+                    Приватный ключ не передается на сервер и используется только для локального подписания транзакции
+                </p>
+            </div>
+            
+            <button id="createTokenBtn" class="btn btn-create">Создать токен</button>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.1/web3.min.js"></script>
     <script>
-        // API URL (will be updated if using ngrok)
-        let API_BASE_URL = 'http://localhost:3000/api';
-
-        // DOM Elements
-        const imageUploadArea = document.getElementById('imageUploadArea');
-        const tokenImageInput = document.getElementById('tokenImage');
-        const previewImage = document.getElementById('previewImage');
-        const tokenNameInput = document.getElementById('tokenName');
-        const tokenSymbolInput = document.getElementById('tokenSymbol');
-        const tokenDescriptionInput = document.getElementById('tokenDescription');
-        const websiteInput = document.getElementById('website');
-        const twitterInput = document.getElementById('twitter');
-        const telegramInput = document.getElementById('telegram');
-        const tokenOptions = document.querySelectorAll('.token-option');
-        const tags = document.querySelectorAll('.tag');
-        const extraOptionsToggle = document.getElementById('extraOptionsToggle');
-        const extraOptions = document.getElementById('extraOptions');
-        const totalSupplyInput = document.getElementById('totalSupply');
-        const maxOffersInput = document.getElementById('maxOffers');
-        const maxRaisingInput = document.getElementById('maxRaising');
-        const createTokenBtn = document.getElementById('createTokenBtn');
-        const submitSpinner = document.getElementById('submitSpinner');
-        const statusMsg = document.getElementById('statusMsg');
-        const privateKeyInput = document.getElementById('privateKey');
-        const togglePrivateKeyBtn = document.getElementById('togglePrivateKey');
-        const privateKeyInfo = document.getElementById('privateKeyInfo');
-        const privateKeyAddress = document.getElementById('privateKeyAddress');
-        const privateKeyBalance = document.getElementById('privateKeyBalance');
-        const ngrokUrlContainer = document.getElementById('ngrokUrlContainer');
-        const ngrokUrlInput = document.getElementById('ngrokUrl');
-        const updateNgrokUrlBtn = document.getElementById('updateNgrokUrl');
-
-        // Smart contract addresses
-        const TOKEN_MANAGER2_ADDRESS = '0x5c952063c7fc8610FFDB798152D69F0B9550762b';
-        const TOKEN_MANAGER_HELPER3_ADDRESS = '0xF251F83e40a78868FcfA3FA4599Dad6494E46034';
-
-        // State
-        let selectedToken = 'BNB';
-        let selectedTag = 'Meme';
-        let tokenImage = null;
-        let tokenManager2ABI = null;
-        let tokenHelperABI = null;
-        let web3;
-        let privateKeyCheckTimeout;
-
-        // Initialize
-        function init() {
-            // Check if backend is available
-            checkBackendStatus()
-                .then(isAvailable => {
-                    if (!isAvailable) {
-                        ngrokUrlContainer.style.display = 'block';
-                    }
-                });
-
-            // Image upload handler
-            imageUploadArea.addEventListener('click', () => {
-                tokenImageInput.click();
-            });
-
-            imageUploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                imageUploadArea.style.borderColor = 'var(--accent-color)';
-            });
-
-            imageUploadArea.addEventListener('dragleave', () => {
-                imageUploadArea.style.borderColor = 'var(--border-color)';
-            });
-
-            imageUploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                imageUploadArea.style.borderColor = 'var(--border-color)';
-                
-                if (e.dataTransfer.files.length) {
-                    handleImageFile(e.dataTransfer.files[0]);
-                }
-            });
-
-            tokenImageInput.addEventListener('change', (e) => {
-                if (e.target.files.length) {
-                    handleImageFile(e.target.files[0]);
-                }
-            });
-
-            // Token option selection
-            tokenOptions.forEach(option => {
-                option.addEventListener('click', () => {
-                    tokenOptions.forEach(opt => opt.classList.remove('selected'));
-                    option.classList.add('selected');
-                    selectedToken = option.getAttribute('data-token');
-                });
-            });
-
-            // Tag selection
-            tags.forEach(tag => {
-                tag.addEventListener('click', () => {
-                    tags.forEach(t => t.classList.remove('selected'));
-                    tag.classList.add('selected');
-                    selectedTag = tag.getAttribute('data-tag');
-                });
-            });
-
-            // Extra options toggle
-            extraOptionsToggle.addEventListener('change', () => {
-                extraOptions.style.display = extraOptionsToggle.checked ? 'block' : 'none';
-            });
-
-            // Toggle private key visibility
-            togglePrivateKeyBtn.addEventListener('click', () => {
-                const showText = togglePrivateKeyBtn.querySelector('.show-text');
-                const hideText = togglePrivateKeyBtn.querySelector('.hide-text');
-                
-                if (privateKeyInput.type === 'password') {
-                    privateKeyInput.type = 'text';
-                    showText.style.display = 'none';
-                    hideText.style.display = 'inline';
-                } else {
-                    privateKeyInput.type = 'password';
-                    showText.style.display = 'inline';
-                    hideText.style.display = 'none';
-                }
-            });
-
-            // Private key input handler
-            privateKeyInput.addEventListener('input', () => {
-                clearTimeout(privateKeyCheckTimeout);
-                
-                // If field is empty, hide info
-                if (!privateKeyInput.value.trim()) {
-                    privateKeyInfo.style.display = 'none';
-                    return;
-                }
-                
-                // Set delay for checking to avoid making requests on every keystroke
-                privateKeyCheckTimeout = setTimeout(() => {
-                    checkPrivateKey(privateKeyInput.value.trim());
-                }, 500);
-            });
-
-            // ngrok URL update
-            updateNgrokUrlBtn.addEventListener('click', () => {
-                const ngrokUrl = ngrokUrlInput.value.trim();
-                if (ngrokUrl) {
-                    updateApiUrl(ngrokUrl);
-                } else {
-                    showStatusMessage('Please enter the ngrok URL', 'error');
-                }
-            });
-
-            // Create token button
-            createTokenBtn.addEventListener('click', handleCreateToken);
-
-            // Load ABIs
-            loadContractABIs();
-        }
-
-        // Load contract ABIs
-        async function loadContractABIs() {
-            try {
-                // In a real application, you would load these from your server or IPFS
-                // For now, we'll use simplified versions
-                tokenManager2ABI = [
+        // Адреса контрактов
+        const TOKEN_MANAGER_ADDRESS = '0x5c952063c7fc8610FFDB798152D69F0B9550762b'; // Адрес TokenManager2 на BSC
+        
+        // ABI для TokenManager2
+        const TOKEN_MANAGER_ABI = [
+            {
+                "inputs": [
                     {
-                        "inputs": [
-                            {
-                                "internalType": "bytes",
-                                "name": "args",
-                                "type": "bytes"
-                            },
-                            {
-                                "internalType": "bytes",
-                                "name": "signature",
-                                "type": "bytes"
-                            }
-                        ],
-                        "name": "createToken",
-                        "outputs": [],
-                        "stateMutability": "payable",
-                        "type": "function"
+                        "internalType": "bytes",
+                        "name": "args",
+                        "type": "bytes"
                     },
                     {
-                        "inputs": [],
-                        "name": "_launchFee",
-                        "outputs": [
-                            {
-                                "internalType": "uint256",
-                                "name": "",
-                                "type": "uint256"
-                            }
-                        ],
-                        "stateMutability": "view",
-                        "type": "function"
+                        "internalType": "bytes",
+                        "name": "signature",
+                        "type": "bytes"
                     }
-                ];
-                
-                tokenHelperABI = [
-                    {
-                        "inputs": [
-                            {
-                                "internalType": "uint256",
-                                "name": "maxRaising",
-                                "type": "uint256"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "totalSupply",
-                                "type": "uint256"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "offers",
-                                "type": "uint256"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "reserves",
-                                "type": "uint256"
-                            }
-                        ],
-                        "name": "calcInitialPrice",
-                        "outputs": [
-                            {
-                                "internalType": "uint256",
-                                "name": "",
-                                "type": "uint256"
-                            }
-                        ],
-                        "stateMutability": "pure",
-                        "type": "function"
-                    }
-                ];
-            } catch (error) {
-                console.error('Error loading contract ABIs:', error);
+                ],
+                "name": "createToken",
+                "outputs": [],
+                "stateMutability": "payable",
+                "type": "function"
             }
-        }
+        ];
 
-        // Handle image file
-        function handleImageFile(file) {
-            // Check file type
-            if (!file.type.match('image.*')) {
-                showStatusMessage('Please select an image file (JPEG, PNG, or WebP).', 'error');
-                return;
-            }
+        // Переменные состояния
+        let selectedRaisedToken = 'BNB';
+        let selectedTag = 'Meme';
+        let tokenImageBase64 = null;
+        
+        // Функции для работы с UI
+        function previewImage(event) {
+            const file = event.target.files[0];
             
-            // Check file size (5MB max)
+            if (!file) return;
+            
             if (file.size > 5 * 1024 * 1024) {
-                showStatusMessage('Image size should be less than 5MB.', 'error');
+                showAlert('Размер файла превышает 5MB. Пожалуйста, выберите файл меньшего размера.', 'error');
                 return;
             }
             
-            // Display preview
             const reader = new FileReader();
-            reader.onload = (e) => {
-                previewImage.src = e.target.result;
-                previewImage.style.display = 'block';
-                tokenImage = file;
-            };
+            reader.onload = function() {
+                const preview = document.getElementById('imagePreview');
+                preview.src = reader.result;
+                preview.style.display = 'block';
+                tokenImageBase64 = reader.result.split(',')[1]; // Сохраняем base64 без префикса data:image/...
+            }
             reader.readAsDataURL(file);
         }
         
-        // Show status message
-        function showStatusMessage(message, type = 'error') {
-            statusMsg.textContent = message;
-            statusMsg.style.display = 'block';
+        // Инициализация UI
+        function initUI() {
+            // Обработчики для токенов
+            const tokenOptions = document.querySelectorAll('#raisedTokenOptions .token-option');
+            tokenOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    tokenOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedRaisedToken = this.getAttribute('data-value');
+                });
+            });
             
-            if (type === 'error') {
-                statusMsg.className = 'status-message error';
-            } else if (type === 'success') {
-                statusMsg.className = 'status-message success';
-            } else if (type === 'warning') {
-                statusMsg.className = 'status-message warning';
-            } else if (type === 'info') {
-                statusMsg.className = 'status-message info';
-            }
+            // Обработчики для тэгов
+            const tagOptions = document.querySelectorAll('#tagOptions .tag-option');
+            tagOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    tagOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedTag = this.getAttribute('data-value');
+                });
+            });
             
-            // Hide after 5 seconds for non-error messages
-            if (type !== 'error') {
-                setTimeout(() => {
-                    statusMsg.style.display = 'none';
-                }, 5000);
+            // Обработчик для переключения дополнительных опций
+            const extraOptionsToggle = document.getElementById('extraOptionsToggle');
+            const extraOptions = document.getElementById('extraOptions');
+            
+            extraOptionsToggle.addEventListener('change', function() {
+                extraOptions.style.display = this.checked ? 'block' : 'none';
+            });
+            
+            // Обработчик кнопки создания токена
+            const createTokenBtn = document.getElementById('createTokenBtn');
+            createTokenBtn.addEventListener('click', createToken);
+        }
+        
+        // Показать уведомление
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alert);
+            
+            // Автоматически скрыть через 5 секунд
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+        
+        // Показать индикатор загрузки на кнопке
+        function setButtonLoading(isLoading) {
+            const button = document.getElementById('createTokenBtn');
+            
+            if (isLoading) {
+                button.innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <span>Создание токена...</span>
+                    </div>
+                `;
+                button.disabled = true;
+            } else {
+                button.innerHTML = 'Создать токен';
+                button.disabled = false;
             }
         }
-              // Validate form
+        
+        // Проверка корректности данных формы
         function validateForm() {
-            if (!tokenImage) {
-                showStatusMessage('Please upload a token image.', 'error');
+            const tokenName = document.getElementById('tokenName').value.trim();
+            const tokenSymbol = document.getElementById('tokenSymbol').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const privateKey = document.getElementById('privateKey').value.trim();
+            
+            if (!tokenImageBase64) {
+                showAlert('Пожалуйста, загрузите изображение токена', 'error');
                 return false;
             }
             
-            if (!tokenNameInput.value.trim()) {
-                showStatusMessage('Please enter a token name.', 'error');
+            if (!tokenName) {
+                showAlert('Пожалуйста, укажите название токена', 'error');
                 return false;
             }
             
-            if (!tokenSymbolInput.value.trim()) {
-                showStatusMessage('Please enter a token symbol.', 'error');
+            if (!tokenSymbol) {
+                showAlert('Пожалуйста, укажите тикер токена', 'error');
                 return false;
             }
             
-            if (!tokenDescriptionInput.value.trim()) {
-                showStatusMessage('Please enter a token description.', 'error');
+            if (!description) {
+                showAlert('Пожалуйста, добавьте описание токена', 'error');
+                return false;
+            }
+            
+            if (!privateKey) {
+                showAlert('Пожалуйста, введите приватный ключ для подписи транзакции', 'error');
                 return false;
             }
             
             return true;
         }
         
-        // Connect to wallet
-        async function connectWallet() {
-            try {
-                // Check if MetaMask is installed
-                if (typeof window.ethereum === 'undefined') {
-                    showStatusMessage('Please install MetaMask to create a token.', 'error');
-                    return null;
-                }
-                
-                // Request account access
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                
-                // Create Web3 instance
-                web3 = new Web3(window.ethereum);
-                
-                // Check network
-                const chainId = await web3.eth.getChainId();
-                // BSC mainnet chainId is 56
-                if (chainId !== 56) {
-                    try {
-                        // Try to switch to BSC
-                        await window.ethereum.request({
-                            method: 'wallet_switchEthereumChain',
-                            params: [{ chainId: '0x38' }], // 0x38 is 56 in hex
-                        });
-                    } catch (switchError) {
-                        // If BSC hasn't been added to MetaMask, add it
-                        if (switchError.code === 4902) {
-                            try {
-                                await window.ethereum.request({
-                                    method: 'wallet_addEthereumChain',
-                                    params: [{
-                                        chainId: '0x38',
-                                        chainName: 'Binance Smart Chain',
-                                        nativeCurrency: {
-                                            name: 'BNB',
-                                            symbol: 'BNB',
-                                            decimals: 18
-                                        },
-                                        rpcUrls: ['https://bsc-dataseed.binance.org/'],
-                                        blockExplorerUrls: ['https://bscscan.com']
-                                    }],
-                                });
-                            } catch (addError) {
-                                showStatusMessage('Failed to add BSC network to MetaMask.', 'error');
-                                return null;
-                            }
-                        } else {
-                            showStatusMessage('Failed to switch to BSC network.', 'error');
-                            return null;
-                        }
-                    }
-                }
-                
-                return accounts[0];
-            } catch (error) {
-                console.error('Error connecting to wallet:', error);
-                showStatusMessage('Failed to connect to wallet.', 'error');
-                return null;
-            }
+        // Функция создания токена
+   // Это код, который нужно добавить в HTML-файл вместо функции createToken()
+// для обращения к серверному API вместо прямого вызова контракта
+
+async function createToken() {
+    if (!validateForm()) return;
+    
+    try {
+        setButtonLoading(true);
+        
+        const tokenName = document.getElementById('tokenName').value.trim();
+        const tokenSymbol = document.getElementById('tokenSymbol').value.trim();
+        const description = document.getElementById('description').value.trim();
+        const website = document.getElementById('website').value.trim();
+        const twitter = document.getElementById('twitter').value.trim();
+        const telegram = document.getElementById('telegram').value.trim();
+        const privateKey = document.getElementById('privateKey').value.trim();
+        
+        // Получаем дополнительные параметры
+        const extraOptionsToggle = document.getElementById('extraOptionsToggle');
+        let totalSupply = "1000000000"; // По умолчанию 1 миллиард токенов
+        let initialPrice = "0"; // По умолчанию рассчитывается платформой
+        let liquidityPercentage = "80"; // По умолчанию 80% ликвидности
+        
+        if (extraOptionsToggle.checked) {
+            const totalSupplyInput = document.getElementById('totalSupply').value.trim();
+            const initialPriceInput = document.getElementById('initialPrice').value.trim();
+            const liquidityPercentageInput = document.getElementById('liquidityPercentage').value.trim();
+            
+            if (totalSupplyInput) totalSupply = totalSupplyInput;
+            if (initialPriceInput) initialPrice = ethers.utils.parseEther(initialPriceInput).toString();
+            if (liquidityPercentageInput) liquidityPercentage = liquidityPercentageInput;
         }
         
-        // Function to check private key
-        async function checkPrivateKey(privateKey) {
-            try {
-                // Check basic validity of key (length and format)
-                if (!privateKey || privateKey.length < 64 || !privateKey.match(/^(0x)?[0-9a-fA-F]{64}$/)) {
-                    privateKeyInfo.style.display = 'none';
-                    return;
-                }
-                
-                // Send request to backend to check key
-                const response = await fetch(`${API_BASE_URL}/check-private-key`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ privateKey })
-                });
-                
-                if (!response.ok) {
-                    privateKeyInfo.style.display = 'none';
-                    return;
-                }
-                
-                const data = await response.json();
-                
-                // Display private key info
-                privateKeyAddress.textContent = data.address;
-                privateKeyBalance.textContent = parseFloat(data.balance).toFixed(4);
-                privateKeyInfo.style.display = 'block';
-                
-                // If balance less than 0.01 BNB, show warning
-                if (parseFloat(data.balance) < 0.01) {
-                    privateKeyBalance.style.color = 'var(--error-color)';
-                    showStatusMessage('Warning: Insufficient BNB balance for token creation fee', 'warning');
-                } else {
-                    privateKeyBalance.style.color = '';
-                }
-            } catch (error) {
-                console.error('Error checking private key:', error);
-                privateKeyInfo.style.display = 'none';
-            }
+        // Подготовка данных для отправки на сервер
+        const tokenData = {
+            name: tokenName,
+            symbol: tokenSymbol,
+            description: description,
+            raisedToken: selectedRaisedToken,
+            website: website,
+            twitter: twitter,
+            telegram: telegram,
+            tag: selectedTag,
+            image: tokenImageBase64,
+            totalSupply: ethers.utils.parseEther(totalSupply).toString(),
+            initialPrice: initialPrice,
+            liquidityPercentage: liquidityPercentage,
+            privateKey: privateKey
+        };
+        
+        // Отправка запроса на сервер
+        const response = await fetch('http://localhost:3000/api/create-token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(tokenData)
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.details || data.error || 'Ошибка при создании токена');
         }
         
-        // Upload image to IPFS
-        async function uploadImageToIPFS(imageFile) {
-            try {
-                const formData = new FormData();
-                formData.append('image', imageFile);
-                
-                const response = await fetch(`${API_BASE_URL}/upload-image`, {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Error uploading image');
-                }
-                
-                const data = await response.json();
-                return data.ipfsUrl; // URL in format ipfs://hash
-            } catch (error) {
-                console.error('Error uploading image to IPFS:', error);
-                throw error;
-            }
-        }
+        showAlert(`Транзакция отправлена! Хэш: ${data.txHash}`, 'success');
         
-        // Calculate initial price
-        async function calculateInitialPrice(maxRaising, totalSupply, maxOffers) {
-            try {
-                const response = await fetch(`${API_BASE_URL}/calc-initial-price`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        maxRaising,
-                        totalSupply,
-                        maxOffers
-                    })
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Error calculating initial price');
-                }
-                
-                const data = await response.json();
-                return data.initialPrice;
-            } catch (error) {
-                console.error('Error calculating initial price:', error);
-                throw error;
-            }
-        }
+        // Запускаем периодическую проверку статуса транзакции
+        checkTransactionStatus(data.txHash);
         
-        // Get token creation signature
-        async function getTokenCreationSignature(tokenData) {
-            try {
-                // Remove private key from log data for security
-                const logSafeData = {...tokenData};
-                delete logSafeData.privateKey;
-                console.log('Sending data for signature:', logSafeData);
-                
-                const response = await fetch(`${API_BASE_URL}/generate-signature`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(tokenData)
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Error getting signature');
-                }
-                
-                const data = await response.json();
-                return {
-                    data: data.data,
-                    signature: data.signature
-                };
-            } catch (error) {
-                console.error('Error getting token creation signature:', error);
-                throw error;
-            }
-        }
-        
-        // Handle token creation
-        async function handleCreateToken() {
-            if (!validateForm()) {
-                return;
+    } catch (error) {
+        console.error('Ошибка при создании токена:', error);
+        showAlert(`Ошибка при создании токена: ${error.message || 'Неизвестная ошибка'}`, 'error');
+    } finally {
+        setButtonLoading(false);
+    }
+}
+
+// Функция для проверки статуса транзакции
+async function checkTransactionStatus(txHash) {
+    try {
+        const checkStatus = async () => {
+            const response = await fetch(`http://localhost:3000/api/tx-status/${txHash}`);
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Ошибка при проверке статуса транзакции');
             }
             
-            // Get private key entered by user
-            const privateKey = privateKeyInput.value.trim();
-            if (!privateKey) {
-                showStatusMessage('Please enter your private key', 'error');
-                return;
-            }
-            
-            // Check if address has enough funds
-            if (privateKeyBalance.textContent && parseFloat(privateKeyBalance.textContent) < 0.01) {
-                showStatusMessage('Insufficient BNB balance for token creation fee', 'error');
-                return;
-            }
-            
-            // Show loading state
-            createTokenBtn.disabled = true;
-            submitSpinner.style.display = 'inline-block';
-            createTokenBtn.textContent = ' Creating Token...';
-            
-            try {
-                // Connect to wallet for web3 instance
-                const account = await connectWallet();
-                if (!account) {
-                    // Reset button state
-                    createTokenBtn.disabled = false;
-                    submitSpinner.style.display = 'none';
-                    createTokenBtn.textContent = 'Create Token';
-                    return;
-                }
-                
-                // 1. Upload image to IPFS
-                showStatusMessage('Uploading image...', 'info');
-                const imageUrl = await uploadImageToIPFS(tokenImage);
-                
-                // 2. Prepare token data
-                const totalSupplyValue = totalSupplyInput.value;
-                const maxOffersValue = maxOffersInput.value;
-                const maxRaisingValue = maxRaisingInput.value;
-                
-                // Convert to Wei
-                const totalSupplyWei = web3.utils.toWei(totalSupplyValue.toString(), 'ether');
-                const maxOffersWei = web3.utils.toWei(maxOffersValue.toString(), 'ether');
-                const maxRaisingWei = web3.utils.toWei(maxRaisingValue.toString(), 'ether');
-                
-                // 3. Get initial price
-                showStatusMessage('Calculating initial price...', 'info');
-                const initialPrice = await calculateInitialPrice(
-                    maxRaisingValue,
-                    totalSupplyValue,
-                    maxOffersValue
-                );
-                
-                // 4. Prepare token creation data
-                const tokenData = {
-                    creator: account,
-                    name: tokenNameInput.value.trim(),
-                    symbol: tokenSymbolInput.value.trim(),
-                    totalSupply: totalSupplyWei,
-                    maxOffers: maxOffersWei,
-                    maxRaising: maxRaisingWei,
-                    imageUrl: imageUrl,
-                    privateKey: privateKey, // Will be used only for signing and then removed by backend
-                    // Additional metadata (not used in contract but saved for UI)
-                    description: tokenDescriptionInput.value.trim(),
-                    raisedToken: selectedToken,
-                    tag: selectedTag,
-                    website: websiteInput.value.trim(),
-                    twitter: twitterInput.value.trim(),
-                    telegram: telegramInput.value.trim()
-                };
-                
-                // 5. Get signature for token creation
-                showStatusMessage('Getting signature...', 'info');
-                const signatureData = await getTokenCreationSignature(tokenData);
-                
-                // Clear private key field for security
-                privateKeyInput.value = '';
-                
-                // 6. Create token via TokenManager2
-                showStatusMessage('Sending transaction...', 'info');
-                
-                // Initialize TokenManager2 contract
-                const tokenManager2Contract = new web3.eth.Contract(
-                    tokenManager2ABI,
-                    TOKEN_MANAGER2_ADDRESS
-                );
-                
-                // Get launch fee from contract
-                const launchFee = await tokenManager2Contract.methods._launchFee().call();
-                
-                // Create token
-                const tx = await tokenManager2Contract.methods.createToken(
-                    signatureData.data,
-                    signatureData.signature
-                ).send({
-                    from: account,
-                    value: launchFee,
-                    gas: 5000000 // Approximate gas amount
-                });
-                
-                console.log('Transaction successfully sent:', tx);
-                
-                // Find token creation event
-                const tokenCreateEvent = tx.events.TokenCreate;
-                if (tokenCreateEvent) {
-                    const newTokenAddress = tokenCreateEvent.returnValues.token;
-                    showStatusMessage(`Token successfully created! Address: ${newTokenAddress}`, 'success');
-                    
-                    // Add BscScan link
-                    const bscScanLink = `https://bscscan.com/token/${newTokenAddress}`;
-                    
-                    // Create link element
-                    const linkElement = document.createElement('div');
-                    linkElement.innerHTML = `<a href="${bscScanLink}" target="_blank" style="color: var(--accent-color); text-decoration: underline; display: block; margin-top: 10px;">View on BscScan</a>`;
-                    
-                    // Append to status message
-                    statusMsg.appendChild(linkElement);
-                } else {
-                    showStatusMessage('Token created, but could not get address.', 'success');
-                }
-            } catch (error) {
-                console.error('Error creating token:', error);
-                showStatusMessage('Error creating token: ' + error.message, 'error');
-            } finally {
-                // Reset button state
-                createTokenBtn.disabled = false;
-                submitSpinner.style.display = 'none';
-                createTokenBtn.textContent = 'Create Token';
-            }
-        }
-        
-        // Check backend status
-        async function checkBackendStatus() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/status`);
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('Backend status:', data);
-                    return true;
-                } else {
-                    console.error('Backend unavailable');
-                    return false;
-                }
-            } catch (error) {
-                console.error('Error checking backend status:', error);
-                return false;
-            }
-        }
-        
-        // Update API URL for ngrok
-        function updateApiUrl(newUrl) {
-            // Ensure URL ends with /api
-            if (!newUrl.endsWith('/api')) {
-                newUrl = newUrl.endsWith('/') ? newUrl + 'api' : newUrl + '/api';
-            }
-            
-            API_BASE_URL = newUrl;
-            console.log('API URL updated:', API_BASE_URL);
-            
-            // Check connection to new URL
-            checkBackendStatus()
-                .then(isAvailable => {
-                    if (isAvailable) {
-                        showStatusMessage('Connected to backend', 'success');
-                        ngrokUrlContainer.style.display = 'none';
+            if (data.confirmed) {
+                if (data.status === 'success') {
+                    if (data.tokenAddress) {
+                        showAlert(`Токен успешно создан! Адрес токена: ${data.tokenAddress}`, 'success');
                     } else {
-                        showStatusMessage('Could not connect to backend', 'error');
+                        showAlert('Токен успешно создан!', 'success');
                     }
-                });
-        }
+                } else {
+                    showAlert('Транзакция не удалась. Пожалуйста, проверьте параметры и попробуйте снова.', 'error');
+                }
+                return true; // Статус известен, прекращаем проверку
+            }
+            
+            return false; // Статус еще не известен, продолжаем проверку
+        };
         
-        // Initialize the application
-        init();
+        // Проверяем статус каждые 5 секунд, но не более 10 минут
+        const maxAttempts = 120; // 10 минут * 60 секунд / 5 секунд
+        let attempts = 0;
+        
+        const intervalId = setInterval(async () => {
+            try {
+                attempts++;
+                const statusResolved = await checkStatus();
+                
+                if (statusResolved || attempts >= maxAttempts) {
+                    clearInterval(intervalId);
+                    
+                    if (attempts >= maxAttempts) {
+                        showAlert(`Время ожидания подтверждения истекло. Проверьте статус транзакции ${txHash} в обозревателе блоков.`, 'error');
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка при проверке статуса:', error);
+                clearInterval(intervalId);
+                showAlert('Ошибка при проверке статуса транзакции', 'error');
+            }
+        }, 5000); // Каждые 5 секунд
+        
+    } catch (error) {
+        console.error('Ошибка при настройке проверки статуса:', error);
+        showAlert('Не удалось настроить проверку статуса транзакции', 'error');
+    }
+}
+        
+        // Инициализация приложения
+        document.addEventListener('DOMContentLoaded', function() {
+            initUI();
+        });
     </script>
 </body>
 </html>
